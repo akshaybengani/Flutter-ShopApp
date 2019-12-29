@@ -4,6 +4,9 @@ import 'package:shop_app/widgets/product_item.dart';
 import 'package:provider/provider.dart';
 
 class ProductsGrid extends StatelessWidget {
+  final bool showFavs;
+  ProductsGrid(this.showFavs);
+
   @override
   Widget build(BuildContext context) {
     // Here we used the Provider class to collect products data using the ProductsProvider
@@ -11,7 +14,9 @@ class ProductsGrid extends StatelessWidget {
     // It finds and then call the ProductsProvider constructor with the context
     // .items is the getter function we created in the ProductsProvider class
     // As such the productsData is containing the list of products sent from the getter method.
-    final productsData = Provider.of<ProductsProvider>(context, listen: true).items;
+    final products =
+        Provider.of<ProductsProvider>(context, listen: true);
+    final productsData = showFavs ? products.favitems : products.items;
     // The listen value is defult set to true but I have set it for info, to note that
     // this needs to update whenever the data changes.
 
@@ -34,10 +39,13 @@ class ProductsGrid extends StatelessWidget {
 
       // This is our builder method we use to build the griditem we have provided the
       // layout widget and passed index value in it, it works like a foreach
-      itemBuilder: (ctx, index) => ProductItem(
-        id: productsData[index].id,
-        imageUrl: productsData[index].imageUrl,
-        title: productsData[index].title,
+      itemBuilder: (ctx, index) => ChangeNotifierProvider.value(
+        value: productsData[index],
+        child: ProductItem(
+          // id: productsData[index].id,
+          // imageUrl: productsData[index].imageUrl,
+          // title: productsData[index].title,
+        ),
       ),
     );
   }

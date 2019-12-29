@@ -11,12 +11,15 @@ void main() {
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      // The ChangeNotifierProvider needed to be setuped at the top of the widget tree
-      // And we will setup the listeners wherever we need the change
+    return ChangeNotifierProvider.value(
+      
       // create: is a new version of builder by the way it is the same as builder which
       // creates the context for his own and takes the constructor of the Provider Class
-      create: (ctx) => ProductsProvider(),
+      // create: (ctx) => ProductsProvider(),
+
+      // Since there is an another way of using changenotifier we can simply use
+      // .value at the top in order to remove the extra memory of context 
+      value: ProductsProvider(),
 
       // ...
       child: MaterialApp(

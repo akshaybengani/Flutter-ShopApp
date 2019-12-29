@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 
-class Product {
+class Product with ChangeNotifier{
   final String id;
   final String imageUrl;
   final String title;
@@ -16,4 +16,12 @@ class Product {
     @required this.price,
     this.isFavorite = false,
   });
+
+    // notifyListeners is something like setState of provider package
+    void toggleFavoriteStatus(){
+      // Whenever we call this function the status of favourite changes
+      isFavorite = !isFavorite;
+      notifyListeners();
+    }
+
 }

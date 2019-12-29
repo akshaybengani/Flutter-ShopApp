@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:shop_app/models/product.dart';
+import 'package:shop_app/providers/product.dart';
 
 // "with" is called as mixin in dart which is somewhere as inheriting the class features
 // but not exactly for now we can take it as to use features of ChangeNotifier class.
@@ -44,17 +44,31 @@ class ProductsProvider with  ChangeNotifier{
     ),
   ];
 
+  // var _showFavoritesOnly = false;
+
   // This will return the list of products by making a copy of the items.
   // Because when my products change I have to tell all the channels about the change
   List<Product> get items {
+    // if(_showFavoritesOnly){
+    //   return _items.where((prodItem) => prodItem.isFavorite ).toList();
+    // }
     // ... This is a spread operator which is used to return list items
     return [..._items];
   }
 
-  void addProduct(){
-    // _items.add(value);
-    notifyListeners();
+  List<Product> get favitems {
+    return _items.where((proditem) => proditem.isFavorite ).toList();
   }
+
+  // void showFavorites(){
+  //   _showFavoritesOnly = true;
+  //   notifyListeners();
+  // }
+  // void showAll(){
+  //   _showFavoritesOnly = false;
+  //   notifyListeners();
+  // }
+
 
   // we created a function which returns a list item of product type taking the item
   // from the products list filtered with the id.
@@ -64,5 +78,8 @@ class ProductsProvider with  ChangeNotifier{
   Product findById(String id){
     return _items.firstWhere((prod) => prod.id == id);
   }
+
+
+
 
 }
