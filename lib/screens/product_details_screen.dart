@@ -17,11 +17,45 @@ class ProductDetailsScreen extends StatelessWidget {
     // our provider package which provide us Product item filteing with id as an argument
     // We have added the listen to stop listening automatically when the data is changed
     // since we dont need automatic updates in this screen and by default is is set to true
-    final loadedProduct = Provider.of<ProductsProvider>(context, listen: false).findById(productId);
+    final loadedProduct = Provider.of<ProductsProvider>(context, listen: false)
+        .findById(productId);
 
     return Scaffold(
       appBar: AppBar(
         title: Text(loadedProduct.title),
+      ),
+      body: SingleChildScrollView(
+        child: Column(
+          children: <Widget>[
+            Container(
+              height: 300,
+              width: double.infinity,
+              child: Image.network(
+                loadedProduct.imageUrl,
+                fit: BoxFit.cover,
+              ),
+            ),
+            SizedBox(
+              height: 10,
+            ),
+            Text(
+              '\$' + loadedProduct.price.toString(),
+              style: TextStyle(color: Colors.grey, fontSize: 20),
+            ),
+            SizedBox(
+              height: 10,
+            ),
+            Container(
+              width: double.infinity,
+              padding: EdgeInsets.symmetric(horizontal: 10),
+              child: Text(
+                loadedProduct.description,
+                textAlign: TextAlign.center,
+                softWrap: true,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

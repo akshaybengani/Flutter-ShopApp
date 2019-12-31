@@ -1,4 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:shop_app/providers/cart.dart';
+import 'package:shop_app/screens/cart_screen.dart';
+import 'package:shop_app/widgets/app_drawer.dart';
+import 'package:shop_app/widgets/badge.dart';
 
 import 'package:shop_app/widgets/products_grid.dart';
 
@@ -47,9 +52,21 @@ class _ProductsOverviewScreenState extends State<ProductsOverviewScreen> {
               ),
             ],
           ),
+          Consumer<Cart>(
+            builder: (_, cartData, __) => 
+            Badge(
+              child: IconButton(
+                icon: Icon(Icons.shopping_cart),
+                onPressed: (){
+                  Navigator.of(context).pushNamed(CartScreen.routeName);
+                },
+              ),
+              value: cartData.itemcount.toString(),
+            ),
+          ),
         ],
       ),
-
+      drawer: AppDrawer(),
       // This widget is extracted because we will call the providerpackage data and since
       // That will rebuild the context and we dont need to build Scaffold again for a change
       // in products as such we needed to extract the GridView in seperate widget.
