@@ -11,7 +11,7 @@ class ProductItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final product = Provider.of<Product>(context, listen: false);
-    final cart = Provider.of<Cart>(context,listen: false);
+    final cart = Provider.of<Cart>(context, listen: false);
 
     return ClipRRect(
       borderRadius: BorderRadius.circular(10),
@@ -37,13 +37,26 @@ class ProductItem extends StatelessWidget {
             color: Theme.of(context).accentColor,
             onPressed: () {
               cart.addItem(product.id, product.price, product.title);
+              Scaffold.of(context).hideCurrentSnackBar();
+              Scaffold.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('Added new item to the cart'),
+                  duration: Duration(seconds: 3),
+                  action: SnackBarAction(
+                    label: 'UNDO',
+                    onPressed: () {
+                      cart.removeSingleItem(product.id);
+                    },
+                  ),
+                ),
+              );
             },
           ),
 
           // Consumer is very similar to Provider and it is used with product to optimize
-          // here only the IconButton is making the change as such only parts in consumer 
+          // here only the IconButton is making the change as such only parts in consumer
           // are going to update nothing else.
-          
+
           // 1st arg is the context, 2nd is the dynamic data, and 3rd is the child which
           // will not update in any case by the way its too advanced for tiny optimization.
           trailing: Consumer<Product>(
