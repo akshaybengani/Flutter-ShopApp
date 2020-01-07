@@ -5,9 +5,8 @@ import 'package:shop_app/providers/product.dart';
 // but not exactly for now we can take it as to use features of ChangeNotifier class.
 
 // ChangeNotifier is a class shipped with the provider package, which provide communication
-// tunnels with use of context 
-class ProductsProvider with  ChangeNotifier{
-
+// tunnels with use of context
+class ProductsProvider with ChangeNotifier {
   // This property should not be accessible directly therefore we create a getter
   List<Product> _items = [
     Product(
@@ -57,7 +56,7 @@ class ProductsProvider with  ChangeNotifier{
   }
 
   List<Product> get favitems {
-    return _items.where((proditem) => proditem.isFavorite ).toList();
+    return _items.where((proditem) => proditem.isFavorite).toList();
   }
 
   // void showFavorites(){
@@ -69,17 +68,43 @@ class ProductsProvider with  ChangeNotifier{
   //   notifyListeners();
   // }
 
-
   // we created a function which returns a list item of product type taking the item
   // from the products list filtered with the id.
   // .firstWhere is a list method used to get the single item from the list
   // which mets a specific condition and condition is to check the product id is same or not
   // Since it is an annonymous function which runs everytime until it meets the condition
-  Product findById(String id){
+  Product findById(String id) {
     return _items.firstWhere((prod) => prod.id == id);
   }
 
+  void addProduct(Product product) {
+    final newProduct = Product(
+      id: DateTime.now().toString(),
+      title: product.title,
+      description: product.description,
+      imageUrl: product.imageUrl,
+      price: product.price,
+    );
+    _items.add(newProduct);
+    notifyListeners();
+  }
 
+  void removeItem(String id) {
+    //items.
+  }
+  void deleteProduct(String id){
+    _items.removeWhere((prod) => prod.id == id);
+    notifyListeners();
+  }
 
-
+  void updateProduct(String id, Product newProduct) {
+    final prodIndex = _items.indexWhere((prod) => prod.id == id);
+    if (prodIndex >= 0) {
+      _items[prodIndex] = newProduct;
+      notifyListeners();
+    }
+    else{
+      print('...');
+    }
+  }
 }

@@ -37,7 +37,10 @@ class ProductItem extends StatelessWidget {
             color: Theme.of(context).accentColor,
             onPressed: () {
               cart.addItem(product.id, product.price, product.title);
+              // Since when user press multiple time in short frequency then we need to cancel the
+              // running snackbar and then start the previous one.
               Scaffold.of(context).hideCurrentSnackBar();
+              // To Show a Snack Bar we have an inbuilt feature with Scaffold to show a snackbar
               Scaffold.of(context).showSnackBar(
                 SnackBar(
                   content: Text('Added new item to the cart'),

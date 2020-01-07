@@ -34,7 +34,7 @@ class CartItem extends StatelessWidget {
       // As such confirmDismiss is here.
       confirmDismiss: (_) {
         // We are calling an Annonymous function where we opened an AlertDialog
-        showDialog(
+        return showDialog(
           // This requires a context and we can pass context from the last widget where we build a context
           context: context,
           // here builder is the UI we need in this context not an iterable stuff
@@ -55,7 +55,7 @@ class CartItem extends StatelessWidget {
               FlatButton(
                 child: Text('Yes'),
                 onPressed: () {
-                  // This leads to provide true to the AlertDialog and it popouts the widget too
+                  // This leads to provide true to the AlertDialog and it popouts the widget to
                   Navigator.of(context).pop(true);
                 },
               ),
