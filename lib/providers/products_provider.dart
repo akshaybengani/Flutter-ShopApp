@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shop_app/providers/product.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 // "with" is called as mixin in dart which is somewhere as inheriting the class features
 // but not exactly for now we can take it as to use features of ChangeNotifier class.
@@ -77,22 +79,48 @@ class ProductsProvider with ChangeNotifier {
     return _items.firstWhere((prod) => prod.id == id);
   }
 
-  void addProduct(Product product) {
-    final newProduct = Product(
-      id: DateTime.now().toString(),
-      title: product.title,
-      description: product.description,
-      imageUrl: product.imageUrl,
-      price: product.price,
-    );
-    _items.add(newProduct);
-    notifyListeners();
+  Future<void> addProduct(Product product) {
+    // Since we are using firebase database we can set undefined endpoints and
+    // when the request recieves it will create that collection
+    const url = 'https://shopapp-546fd.firebaseio.com/products.json';
+
+    return http
+        .post(url,
+            body: json.encode({
+              'title': product.title,
+              'description': product.description,
+              'imageUrl': product.imageUrl,
+              'price': product.price,
+              'isFavourite': product.isFavorite,
+            }))
+        // This then block executes after the request completion
+        // the response we get from firebase we get the node id
+        .then((response) {
+      print(response);
+      print(json.decode(response.body));
+      final newProduct = Product(
+        id: json.decode(response.body)['name'],
+        title: product.title,
+        description: product.description,
+        imageUrl: product.imageUrl,
+        price: product.price,
+      );
+      _items.add(newProduct);
+      notifyListeners();
+    }).catchError((onError){
+      print(onError.toString());
+      // throw basically provide us a functionality to send the same error again from the
+      // current catch error to the next one so we can use the error again
+      throw onError;
+      // here in this case we will use this error in edit_product_screen where we called provider
+      // to add product using this class constructor.
+    });
   }
 
   void removeItem(String id) {
     //items.
   }
-  void deleteProduct(String id){
+  void deleteProduct(String id) {
     _items.removeWhere((prod) => prod.id == id);
     notifyListeners();
   }
@@ -102,8 +130,7 @@ class ProductsProvider with ChangeNotifier {
     if (prodIndex >= 0) {
       _items[prodIndex] = newProduct;
       notifyListeners();
-    }
-    else{
+    } else {
       print('...');
     }
   }
