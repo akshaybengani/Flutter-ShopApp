@@ -82,54 +82,87 @@ class _EditProductScreenState extends State<EditProductScreen> {
     super.dispose();
   }
 
-  void _saveForm() {
+  Future<void> myErrorDialog() {
+    return showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text('An Error Occured'),
+        content: Text('Something went wrong please try again !!'),
+        actions: <Widget>[
+          FlatButton(
+            child: Text('Ok'),
+            onPressed: () {
+              // This is to get out from the alert dialog
+              Navigator.of(context).pop();
+            },
+          )
+        ],
+      ),
+    );
+  }
+
+  Future<void> _saveForm() async {
+    // this is to run the validation program build inside all form elements
+    // And it will return true or false and if not then this function will return null and stops
     final isValid = _form.currentState.validate();
     if (!isValid) {
       return;
     }
+
+    // Now if the form is valid then we can save its data in local memory RAM using this
     _form.currentState.save();
+
+    // Since now we have to send the validated saved data to cloud as such it will take time
+    // and now all the async related code will work so we set the progress bar to true
     setState(() {
+      // Now the build will run again and will display an empty layout
       isLoading = true;
     });
+
+    // since in case if we get a id of an edited product this means the data is already stored in database
+    // and we just neeed to update it not to add a new node.
     if (_editedProduct.id != null) {
-      Provider.of<ProductsProvider>(context, listen: false)
-          .updateProduct(_editedProduct.id, _editedProduct);
-      setState(() {
-        isLoading = false;
-      });
+      // we used the provider with an function we built to update data on a specific id and we have
+      // not implemented the cloud version of this currently as such this is small
+      try {
+        await Provider.of<ProductsProvider>(context, listen: false)
+            .updateProduct(_editedProduct.id, _editedProduct);
+      } catch (onError) {
+        await myErrorDialog();
+      }
+
+      // As such above line of code will not take time so we set the screen state to false without async
+
+      // Now we need to go back to manage Products screen so we have to pop out
       Navigator.of(context).pop();
-    } else {
-      Provider.of<ProductsProvider>(context, listen: false)
-          .addProduct(_editedProduct)
-          .then((_) {
-        setState(() {
-          Navigator.of(context).pop();
-        });
-      }).catchError((onError) {
-        showDialog(
-          context: context,
-          builder: (ctx) => AlertDialog(
-            title: Text('An Error Occured'),
-            content: Text('Something went wrong please try again !!'),
-            actions: <Widget>[
-              FlatButton(
-                child: Text('Ok'),
-                onPressed: () {
-                  // This is to get out from the alert dialog
-                  Navigator.of(context).pop();
-                  // This is to get out from edit_product_screen
-                  Navigator.of(context).pop();
-                },
-              )
-            ],
-          ),
-        );
-      }).then((_) {
-        setState(() {
-          isLoading = false;
-        });
-      });
     }
+
+    // This will execute when we have a case of new product addup not editing existing
+    else {
+      // A try block is used here because there can be any type of error occured during the below code
+      try {
+        // here the addProduct method will take time and whereever something takes time we use await
+        await Provider.of<ProductsProvider>(context, listen: false)
+            .addProduct(_editedProduct);
+      }
+
+      // Catch will run after try and only if try fails
+      catch (onError) {
+        // since the user will take time to press ok button so we have added await
+        await myErrorDialog();
+        // This finally block will run after the previous two blocks not because it is below
+        // But we have added await in the execution so there is no chance to run it in between
+      }
+      // finally {
+      //   setState(() {
+      //     isLoading = false;
+      //   });
+      //   Navigator.of(context).pop();
+      // }
+    }
+    setState(() {
+      isLoading = false;
+    });
   }
 
   @override

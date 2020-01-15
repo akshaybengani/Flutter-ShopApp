@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shop_app/providers/cart.dart';
+import 'package:shop_app/providers/products_provider.dart';
 import 'package:shop_app/screens/cart_screen.dart';
 import 'package:shop_app/widgets/app_drawer.dart';
 import 'package:shop_app/widgets/badge.dart';
@@ -19,6 +20,24 @@ class ProductsOverviewScreen extends StatefulWidget {
 
 class _ProductsOverviewScreenState extends State<ProductsOverviewScreen> {
   var _showOnlyFavorites = false;
+  var isInit = true;
+  var isLoading = true;
+
+  @override
+  void didChangeDependencies() {
+    if (isInit) {
+      setState(() {
+        isLoading = true;
+      });
+      Provider.of<ProductsProvider>(context).fetchAndSetProducts().then((_) {
+        setState(() {
+          isLoading = false;
+        });
+      });
+    }
+    isInit = false;
+    super.didChangeDependencies();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -53,11 +72,10 @@ class _ProductsOverviewScreenState extends State<ProductsOverviewScreen> {
             ],
           ),
           Consumer<Cart>(
-            builder: (_, cartData, __) => 
-            Badge(
+            builder: (_, cartData, __) => Badge(
               child: IconButton(
                 icon: Icon(Icons.shopping_cart),
-                onPressed: (){
+                onPressed: () {
                   Navigator.of(context).pushNamed(CartScreen.routeName);
                 },
               ),
@@ -70,7 +88,7 @@ class _ProductsOverviewScreenState extends State<ProductsOverviewScreen> {
       // This widget is extracted because we will call the providerpackage data and since
       // That will rebuild the context and we dont need to build Scaffold again for a change
       // in products as such we needed to extract the GridView in seperate widget.
-      body: ProductsGrid(_showOnlyFavorites),
+      body: isLoading ? Center(child: CircularProgressIndicator(),) : ProductsGrid(_showOnlyFavorites),
     );
   }
 }
