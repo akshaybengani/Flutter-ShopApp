@@ -1,6 +1,8 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:shop_app/providers/auth.dart';
 import 'package:shop_app/providers/cart.dart';
 import 'package:http/http.dart' as http;
 
@@ -19,9 +21,11 @@ class Orders with ChangeNotifier {
   List<OrderItem> get orders {
     return [..._orders];
   }
+String authToken;
+  Future<void> fetchAndSetOrders(BuildContext ctx) async {
+    authToken = Provider.of<Auth>( ctx ,listen: false).token;
 
-  Future<void> fetchAndSetOrders() async {
-    const url = 'https://fireapp-2369b.firebaseio.com/ShopApp/Orders.json';
+    final url = 'https://fireapp-2369b.firebaseio.com/ShopApp/Orders.json?auth=$authToken';
     final response = await http.get(url);
     // print(json.decode(response.body));
 
@@ -55,7 +59,7 @@ class Orders with ChangeNotifier {
   }
 
   Future<void> addOrder({List<CartItem> cartProducts, double total}) async {
-    const url = 'https://fireapp-2369b.firebaseio.com/ShopApp/Orders.json';
+    final url = 'https://fireapp-2369b.firebaseio.com/ShopApp/Orders.json?auth=$authToken';
     final timeStamp = DateTime.now();
 
     final response = await http.post(url,

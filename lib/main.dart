@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shop_app/providers/auth.dart';
 import 'package:shop_app/providers/cart.dart';
 import 'package:shop_app/providers/orders.dart';
+import 'package:shop_app/screens/auth_screen.dart';
 import 'package:shop_app/screens/cart_screen.dart';
 import 'package:shop_app/screens/edit_product_screen.dart';
 import 'package:shop_app/screens/orders_screen.dart';
@@ -23,12 +25,17 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider.value(
-          // create: is a new version of builder by the way it is the same as builder which
-          // creates the context for his own and takes the constructor of the Provider Class
-          // create: (ctx) => ProductsProvider(),
+          value: Auth(),
+        ),
 
-          // Since there is an another way of using changenotifier we can simply use
-          // .value at the top in order to remove the extra memory of context
+        // create: is a new version of builder by the way it is the same as builder which
+        // creates the context for his own and takes the constructor of the Provider Class
+        // create: (ctx) => ProductsProvider(),
+        // Since there is an another way of using changenotifier we can simply use
+        // .value at the top in order to remove the extra memory of context
+
+        // The Auth provider needs to be at the top
+        ChangeNotifierProvider.value(
           value: ProductsProvider(),
         ),
 
@@ -41,7 +48,6 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider.value(
           value: Orders(),
         ),
-
       ],
       // This child is of Multiprovider which contains list of multiple providers.
       child: MaterialApp(
@@ -51,7 +57,8 @@ class MyApp extends StatelessWidget {
           accentColor: Colors.deepOrange,
           fontFamily: 'Lato',
         ),
-        home: ProductsOverviewScreen(),
+        //home: auth.isAuth ? ProductsOverviewScreen() : AuthScreen(),
+        home: MyHomePage(),
         debugShowCheckedModeBanner: false,
         routes: {
           // '/': (ctx) => ProductsOverviewScreen(),
@@ -60,7 +67,7 @@ class MyApp extends StatelessWidget {
           OrdersScreen.routeName: (ctx) => OrdersScreen(),
           UserProductsScreen.routeName: (ctx) => UserProductsScreen(),
           EditProductScreen.routeName: (ctx) => EditProductScreen(),
-
+          ProductsOverviewScreen.routename: (ctx) => ProductsOverviewScreen(),
         },
       ),
     );
@@ -68,8 +75,14 @@ class MyApp extends StatelessWidget {
 }
 
 class MyHomePage extends StatelessWidget {
+
   @override
   Widget build(BuildContext context) {
-    return ProductsOverviewScreen();
+    String token = Provider.of<Auth>(context, listen: false).token;
+    if (token != null) {
+      return ProductsOverviewScreen();
+    } else {
+      return AuthScreen();
+    }
   }
 }

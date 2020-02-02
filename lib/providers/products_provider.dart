@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:shop_app/providers/auth.dart';
 import 'package:shop_app/providers/product.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -49,6 +51,8 @@ class ProductsProvider with ChangeNotifier {
   // This will return the list of products by making a copy of the items.
   // Because when my products change I have to tell all the channels about the change
 
+  // The auth token we will be using to use as the value for auth in url.
+
   List<Product> get items {
     // ... This is a spread operator which is used to return list items
     return [..._items];
@@ -59,9 +63,14 @@ class ProductsProvider with ChangeNotifier {
     return _items.where((proditem) => proditem.isFavorite).toList();
   }
 
-  Future<void> fetchAndSetProducts() async {
-    const url = 'https://fireapp-2369b.firebaseio.com/ShopApp/products.json';
+  String authToken;
 
+  Future<void> fetchAndSetProducts(BuildContext ctx) async {
+    
+    authToken = Provider.of<Auth>( ctx ,listen: false).token;
+
+    final url = 'https://fireapp-2369b.firebaseio.com/ShopApp/products.json?auth=$authToken';
+    
     try {
       final response = await http.get(url);
       final extractedData = json.decode(response.body) as Map<String, dynamic>;
@@ -75,7 +84,7 @@ class ProductsProvider with ChangeNotifier {
             description: prodData['description'],
             imageUrl: prodData['imageUrl'],
             price: prodData['price'],
-            isFavorite: prodData['isFavourite'],
+            // isFavorite: prodData['isFavourite'],
           ),
         );
       });
@@ -96,7 +105,7 @@ class ProductsProvider with ChangeNotifier {
   Future<void> addProduct(Product product) async {
     // Since we are using firebase database we can set undefined endpoints and
     // when the request recieves it will create that collection
-    const url = 'https://fireapp-2369b.firebaseio.com/ShopApp/products.json';
+    final url = 'https://fireapp-2369b.firebaseio.com/ShopApp/products.json?auth=$authToken';
 
     try {
       // ! This code is to upload product values to firebase
@@ -107,7 +116,7 @@ class ProductsProvider with ChangeNotifier {
           'description': product.description,
           'imageUrl': product.imageUrl,
           'price': product.price,
-          'isFavourite': product.isFavorite,
+          // 'isFavourite': product.isFavorite,
         }),
       );
       // ! This code is to use the upload key and then add to local list
@@ -141,7 +150,7 @@ class ProductsProvider with ChangeNotifier {
     //items.
   }
   Future<void> deleteProduct(String id) async {
-    final url = 'https://fireapp-2369b.firebaseio.com/ShopApp/products/$id.json';
+    final url = 'https://fireapp-2369b.firebaseio.com/ShopApp/products/$id.json?auth=$authToken';
 
     await http.delete(url).then((_) {
       _items.removeWhere((prod) => prod.id == id);
@@ -155,7 +164,7 @@ class ProductsProvider with ChangeNotifier {
   Future<void> updateProduct(String id, Product newProduct) async {
     final prodIndex = _items.indexWhere((prod) => prod.id == id);
     if (prodIndex >= 0) {
-      final url = 'https://fireapp-2369b.firebaseio.com/ShopApp/products/$id.json';
+      final url = 'https://fireapp-2369b.firebaseio.com/ShopApp/products/$id.json?auth=$authToken';
 
       try {
         await http.patch(url,

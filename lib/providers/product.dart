@@ -1,7 +1,10 @@
 import 'dart:convert';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
+import 'package:shop_app/providers/auth.dart';
 
 class Product with ChangeNotifier {
   final String id;
@@ -26,18 +29,19 @@ class Product with ChangeNotifier {
   }
 
   // notifyListeners is something like setState of provider package
-  Future<void> toggleFavoriteStatus() async {
+  Future<void> toggleFavoriteStatus(BuildContext ctx) async {
     // Whenever we call this function the status of favourite changes
+
+    String authToken = Provider.of<Auth>(ctx, listen: false).token;
+    String userId = Provider.of<Auth>(ctx, listen: false).userId;
 
     final oldStatus = isFavorite;
     isFavorite = !isFavorite;
     notifyListeners();
-    final url = 'https://fireapp-2369b.firebaseio.com/ShopApp/products/$id.json';
+    final url =
+        'https://fireapp-2369b.firebaseio.com/ShopApp/userFavorites/$userId/id.json?auth=$authToken';
     try {
-      final response = await http.patch(url,
-          body: json.encode({
-            'isFavourite': isFavorite,
-          }));
+      final response = await http.put(url, body: json.encode(isFavorite) );
       if (response.statusCode >= 400) {
         _setFavValue(oldStatus);
       }
