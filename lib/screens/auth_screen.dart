@@ -110,7 +110,8 @@ class _AuthCardState extends State<AuthCard>
   // its an object for controlling animations
   AnimationController _controller;
   // This is The animation we actually going to perform it is a generic type
-  Animation<Size> _heightAnimation;
+  // Slide Animation takes the offset value
+  Animation<Offset> _slideAnimation;
   Animation<double> _opacityAnimation;
 
   @override
@@ -127,9 +128,10 @@ class _AuthCardState extends State<AuthCard>
 
     //Now come to the animation
     // The tween class knows how to animate between two values
-    _heightAnimation = Tween<Size>(
-      begin: Size(double.infinity, 260),
-      end: Size(double.infinity, 320),
+    // So in the Slide Animation we are going to use offset values they are usually use double values
+    _slideAnimation = Tween<Offset>(
+      begin: Offset(0, -1.5),
+      end: Offset(0, 0),
     ).animate(
       CurvedAnimation(
         parent: _controller,
@@ -249,7 +251,7 @@ class _AuthCardState extends State<AuthCard>
         duration: Duration(milliseconds: 300),
         curve: Curves.easeIn,
         //height: _heightAnimation.value.height,
-        constraints: BoxConstraints(minHeight: _heightAnimation.value.height),
+        //constraints: BoxConstraints(minHeight: _heightAnimation.value.height),
         width: deviceSize.width * 0.75,
         padding: EdgeInsets.all(16.0),
 
@@ -296,18 +298,21 @@ class _AuthCardState extends State<AuthCard>
                   // And that Animation is a double value container which takes opacity values between 0 and 1
                   child: FadeTransition(
                     opacity: _opacityAnimation,
-                    child: TextFormField(
-                      enabled: _authMode == AuthMode.Signup,
-                      decoration:
-                          InputDecoration(labelText: 'Confirm Password'),
-                      obscureText: true,
-                      validator: _authMode == AuthMode.Signup
-                          ? (value) {
-                              if (value != _passwordController.text) {
-                                return 'Passwords do not match!';
+                    child: SlideTransition(
+                      position: _slideAnimation,
+                      child: TextFormField(
+                        enabled: _authMode == AuthMode.Signup,
+                        decoration:
+                            InputDecoration(labelText: 'Confirm Password'),
+                        obscureText: true,
+                        validator: _authMode == AuthMode.Signup
+                            ? (value) {
+                                if (value != _passwordController.text) {
+                                  return 'Passwords do not match!';
+                                }
                               }
-                            }
-                          : null,
+                            : null,
+                      ),
                     ),
                   ),
                 ),
