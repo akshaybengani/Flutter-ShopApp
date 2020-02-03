@@ -21,16 +21,25 @@ class ProductItem extends StatelessWidget {
             border: Border.all(width: 5, color: Colors.green),
           ),
           child: GestureDetector(
-            onTap: () {
-              Navigator.of(context).pushNamed(ProductDetailsScreen.routename,
-                  arguments: product.id);
-            },
-            child: FadeInImage(
-              placeholder: AssetImage("assets/images/product-placeholder.png"),
-              image: NetworkImage(product.imageUrl),
-              fit: BoxFit.cover,
-            )
-          ),
+              onTap: () {
+                Navigator.of(context).pushNamed(ProductDetailsScreen.routename,
+                    arguments: product.id);
+              },
+              // Hero is a widget which is used to add animations while changing screens
+              // Here in hero we need to give it a unique id to work and we are giving our product id
+              // Now we need to add something in the recieveing screen.
+              child: Hero(
+                tag: product.id,
+              // FadeInImage Animation is very useful it sets a placehlolder image
+              // When the network is slow in rendering insteed of showing empty boxes
+              // I have shown the placeholder with a Fade in Image Animation without any controller
+                child: FadeInImage(
+                  placeholder:
+                      AssetImage("assets/images/product-placeholder.png"),
+                  image: NetworkImage(product.imageUrl),
+                  fit: BoxFit.cover,
+                ),
+              )),
         ),
         footer: GridTileBar(
           leading: IconButton(
