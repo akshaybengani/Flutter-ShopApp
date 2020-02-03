@@ -95,7 +95,8 @@ class AuthCard extends StatefulWidget {
   _AuthCardState createState() => _AuthCardState();
 }
 
-class _AuthCardState extends State<AuthCard> {
+class _AuthCardState extends State<AuthCard>
+    with SingleTickerProviderStateMixin {
   final GlobalKey<FormState> _formKey = GlobalKey();
 
   AuthMode _authMode = AuthMode.Login;
@@ -105,6 +106,40 @@ class _AuthCardState extends State<AuthCard> {
   };
   var _isLoading = false;
   final _passwordController = TextEditingController();
+
+  // its an object for controlling animations
+  AnimationController _controller;
+  // This is The animation we actually going to perform it is a generic type
+  Animation<Size> _heightAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      // For vsync to work we need to add a mixin, SingleTickerProviderStateMixin
+      // vsync is basically to provide animation on the state change
+      vsync: this,
+      duration: Duration(
+        milliseconds: 200,
+      ),
+    );
+
+    //Now come to the animation
+    // The tween class knows how to animate between two values
+    _heightAnimation = Tween<Size>(
+      begin: Size(double.infinity, 260),
+      end: Size(double.infinity, 320),
+    ).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: Curves.linear,
+      ),
+    );
+    // we have currently manually managed the listener for the animation
+    _heightAnimation.addListener(() {
+      setState(() {});
+    });
+  }
 
   void _showErrorDialog(String message) {
     showDialog(
@@ -122,6 +157,11 @@ class _AuthCardState extends State<AuthCard> {
         ],
       ),
     );
+  }
+
+  void dispose() {
+    super.dispose();
+    _controller.dispose();
   }
 
   Future<void> _submit() async {
@@ -147,8 +187,8 @@ class _AuthCardState extends State<AuthCard> {
           _authData['password'],
         );
       }
-      Navigator.of(context).pushReplacementNamed(ProductsOverviewScreen.routename);
-      
+      Navigator.of(context)
+          .pushReplacementNamed(ProductsOverviewScreen.routename);
     } on HttpException catch (error) {
       var errorMessage = 'Authentication failed';
       if (error.toString().contains('EMAIL_EXISTS')) {
@@ -179,10 +219,13 @@ class _AuthCardState extends State<AuthCard> {
       setState(() {
         _authMode = AuthMode.Signup;
       });
+      // This forward is used to start the animation
+      _controller.forward();
     } else {
       setState(() {
         _authMode = AuthMode.Login;
       });
+      _controller.reverse();
     }
   }
 
@@ -194,12 +237,16 @@ class _AuthCardState extends State<AuthCard> {
         borderRadius: BorderRadius.circular(10.0),
       ),
       elevation: 8.0,
-      child: Container(
-        height: _authMode == AuthMode.Signup ? 320 : 260,
-        constraints:
-            BoxConstraints(minHeight: _authMode == AuthMode.Signup ? 320 : 260),
-        width: deviceSize.width * 0.75,
-        padding: EdgeInsets.all(16.0),
+      child: AnimatedBuilder(
+        animation: _heightAnimation,
+        builder: (ctx, ch) => Container(
+            //height: _authMode == AuthMode.Signup ? 320 : 260,
+            height: _heightAnimation.value.height,
+            constraints:
+                BoxConstraints(minHeight: _heightAnimation.value.height),
+            width: deviceSize.width * 0.75,
+            padding: EdgeInsets.all(16.0),
+            child: ch),
         child: Form(
           key: _formKey,
           child: SingleChildScrollView(
